@@ -1,0 +1,54 @@
+{
+  "name": "f-virtual-waterfall-vue-rollup",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development -w",
+    "dev-dist": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development,IS_DIST -w",
+    "build": "rollup -c build/rollup.config.prod.js --environment NODE_ENV:production"
+  },
+  "type": "module",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-transform-class-properties": "^7.25.4",
+    "@babel/plugin-transform-runtime": "^7.25.4",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-typescript": "^7.24.7",
+    "@babel/runtime-corejs3": "^7.25.6",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-eslint": "^9.0.5",
+    "@rollup/plugin-html": "^1.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.7",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^22.5.4",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "@vue/compiler-sfc": "^3.5.4",
+    "postcss": "^8.4.45",
+    "postcss-scss": "^4.0.9",
+    "rollup": "^4.21.2",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-serve": "^1.1.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "rollup-plugin-vue": "^6.0.0",
+    "typescript": "^5.6.2",
+    "vue": "^3.5.4"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8",
+    "iOS >= 8",
+    "Firefox >= 20",
+    "Android > 4.4"
+  ],
+  "dependencies": {
+    "tslib": "^2.7.0"
+  }
+}
