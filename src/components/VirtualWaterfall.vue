@@ -38,9 +38,11 @@
         </div>
       </template>
     </div>
-    <slot name="loadingContent">
-      <div class="loading-text">加载中...</div>
-    </slot>
+    <div v-if="isLoadingNextPage">
+      <slot name="loadingContent">
+        <div class="loading-text">加载中...</div>
+      </slot>
+    </div>
   </div>
 </template>
 
@@ -152,7 +154,6 @@ const props = defineProps({
   }
 });
 
-// todo f
 const slots = defineSlots<{
   itemContent(props: {
     item: DomeDataItem
@@ -160,7 +161,6 @@ const slots = defineSlots<{
 }>();
 
 const designWidth = 750;
-// todo f
 const containerRef = ref<HTMLDivElement | null>(null);
 const contentRef = ref<HTMLDivElement | null>(null);
 // 当前渲染的页码
@@ -184,8 +184,6 @@ const endIndex = ref(0);
 const containerOffset = window.innerHeight / 2;
 // 是否正在加载下一页的数据
 const isLoadingNextPage = ref(false);
-// todo f
-const isShowLoading = ref(false);
 // 页面滚动方向，向下为1 (页面底部追加数据 ↓，滚动条向下移动)，向上为 -1（页面顶部追加数据 ↑，滚动条向上移动）
 const scrollDirection = ref(1);
 // 垂直方向上上次滚动的距离
@@ -216,9 +214,8 @@ const init = async () => {
 
   console.log('列表数据', list);
 
-  // todo f
   if (Array.isArray(list)) {
-    hasNextPage.value = !!list.length;
+    hasNextPage.value = list.length === props.pageSize;
   }
 
   // 计算每列的宽度
@@ -442,13 +439,11 @@ const handleScroll = throttle(async () => {
 
   updateDomPosition(scrollDirection.value);
 
-  // todo f hasNextPage
   if (isLoadingNextPage.value || !hasNextPage.value) return;
 
   // 当已经展示出来的内容高度大于当前数据内容总高度的85%的时候开始加载新数据
   if (scrollTop + offsetHeight >= offsetHeight * 0.85) {
     isLoadingNextPage.value = true;
-    isShowLoading.value = true;
 
     // page 加1，获取下一页数据
     page.value += 1;
@@ -457,19 +452,16 @@ const handleScroll = throttle(async () => {
 
     try {
       list = await props.getList((page.value - 1) * props.pageSize);
+
       if (Array.isArray(list)) {
-        // todo f
-        hasNextPage.value = !!list.length;
+        hasNextPage.value = list.length === props.pageSize;
       }
     } catch (err) {
       console.log(err);
-      // todo f
       isLoadingNextPage.value = false;
-      isShowLoading.value = false;
     }
 
     isLoadingNextPage.value = false;
-    isShowLoading.value = false;
     // 处理下一页数据，从下一页数据的开始位置的下标开始操作数据
     const startIdx = (page.value - 1) * props.pageSize;
     // 给当前请求回来的数据添加位置信息
