@@ -1,6 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import typescript from 'rollup-plugin-typescript2';
+import esbuild from 'rollup-plugin-esbuild';
 import babel from '@rollup/plugin-babel';
 import postcss from 'rollup-plugin-postcss';
 import serve from 'rollup-plugin-serve';
@@ -8,11 +8,10 @@ import livereload from 'rollup-plugin-livereload';
 import html from '@rollup/plugin-html';
 import replace from '@rollup/plugin-replace';
 import vue from 'rollup-plugin-vue';
-import eslint from '@rollup/plugin-eslint';
+// import eslint from '@rollup/plugin-eslint';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-const isDist = process.env.IS_DIST;
 const templateHtml = readFileSync('./demo/template.html', 'utf8');
 
 const config = {
@@ -26,12 +25,20 @@ const config = {
   plugins: [
     nodeResolve(),
     commonjs(),
-    typescript({ tsconfig: './tsconfig.dev.json' }),
+    esbuild({
+      include: /\.[jt]s?$/,
+      exclude: /node_modules/,
+      sourceMap: true,
+      minify: process.env.NODE_ENV === 'production',
+      target: 'esnext',
+      // todo f
+      tsconfig: 'tsconfig.dev.json'
+    }),
     // eslint(),
     vue(),
     babel({
       exclude: 'node_modules/**',
-      // extensions: ['.js', '.ts'],
+      extensions: ['.js', '.ts'],
       babelHelpers: 'runtime'
     }),
     replace({
@@ -48,7 +55,7 @@ const config = {
       template: () => templateHtml,
     }),
     postcss({
-      modules: !isDist,
+      modules: false,
       extract: path.resolve('demo/dist/common.css'),
     }),
     serve({

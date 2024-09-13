@@ -26,14 +26,14 @@
           }"
         >
           <!-- todo f -->
-          <slot name="itemContent">
+          <slot name="itemContent" :item="item">
             <div
               class="img-box"
               :style="{height: pxToVW(item.imgBoxHeight)}"
             >
-              <span class="idx">{item.index}</span>
+              <span class="idx">{{ item.index }}</span>
             </div>
-            <div class="text-box ellipsis-line-2">{item.text}</div>
+            <div class="text-box ellipsis-line-2">{{ item.text }}</div>
           </slot>
         </div>
       </template>
@@ -152,6 +152,13 @@ const props = defineProps({
   }
 });
 
+// todo f
+const slots = defineSlots<{
+  itemContent(props: {
+    item: DomeDataItem
+  }): any
+}>();
+
 const designWidth = 750;
 // todo f
 const containerRef = ref<HTMLDivElement | null>(null);
@@ -207,6 +214,8 @@ const init = async () => {
   // 获取列表数据
   const list: any = await props.getList((page.value - 1) * props.pageSize);
 
+  console.log('列表数据', list);
+
   // todo f
   if (Array.isArray(list)) {
     hasNextPage.value = !!list.length;
@@ -221,6 +230,8 @@ const init = async () => {
   // 渲染元素节点
   renderDomByDataList();
 };
+
+init();
 
 // 设置外层容器的高度
 const setContainerHeight = () => {
