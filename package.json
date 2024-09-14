@@ -1,7 +1,11 @@
 {
   "name": "f-virtual-waterfall-vue-rollup",
   "version": "1.0.0",
-  "main": "index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development -w",
     "dev-dist": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development,IS_DIST -w",
