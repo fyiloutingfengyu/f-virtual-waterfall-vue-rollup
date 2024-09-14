@@ -35,7 +35,9 @@ const config = {
       tsconfig: 'tsconfig.dev.json'
     }),
     // eslint(),
-    vue(),
+    vue({
+      exclude: 'dist/**/*',
+    }),
     postcss({
       modules: false,
       extract: path.resolve('demo/dist/common.css'),
@@ -43,10 +45,10 @@ const config = {
     babel({
       exclude: [
         'node_modules/**',
-        'dist/!**!/!*',
-        'demo/dist/!**/!*'
+        'dist/**/*',
+        'demo/dist/**/*'
       ],
-      extensions: ['.js', '.ts','.vue'],
+      extensions: ['.js', '.ts', '.vue'],
       babelHelpers: 'runtime'
     }),
     replace({

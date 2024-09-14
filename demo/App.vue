@@ -23,11 +23,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { shallowRef } from 'vue';
 import { pxToVW } from '../src/utils/common';
 import { testData } from './test/data';
 
-let VirtualWaterfall = ref(null);
+let VirtualWaterfall = shallowRef(null);
 
 // 获取组件
 const getVirtualWaterfallComponent = async () => {
@@ -39,7 +39,7 @@ const getVirtualWaterfallComponent = async () => {
     // 使用 yarn dev 命令打包，使用组件源文件
     VirtualWaterfall.value = (await import('../src/components/VirtualWaterfall.vue')).default;
   }
-}
+};
 
 getVirtualWaterfallComponent();
 
