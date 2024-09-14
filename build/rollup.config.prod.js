@@ -32,16 +32,16 @@ export default [
       }),
       // eslint(),
       vue(),
-      babel({
-        include: './src/**/*',
-        extensions: ['.js', '.ts'],
-        babelHelpers: 'runtime'
-      }),
       postcss({
         // extensions: ['.scss', '.css'],
         // 将样式提取到 dist/main.css 文件中
         extract: path.resolve('dist/main.css'),
         minimize: true
+      }),
+      babel({
+        include: './src/**/*',
+        extensions: ['.js', '.ts','.vue'],
+        babelHelpers: 'runtime'
       }),
     ],
     external: ['vue']

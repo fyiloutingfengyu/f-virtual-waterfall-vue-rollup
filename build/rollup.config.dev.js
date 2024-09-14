@@ -32,14 +32,21 @@ const config = {
       sourceMap: true,
       minify: process.env.NODE_ENV === 'production',
       target: 'esnext',
-      // todo f
       tsconfig: 'tsconfig.dev.json'
     }),
     // eslint(),
     vue(),
+    postcss({
+      modules: false,
+      extract: path.resolve('demo/dist/common.css'),
+    }),
     babel({
-      exclude: 'node_modules/**',
-      extensions: ['.js', '.ts'],
+      exclude: [
+        'node_modules/**',
+        'dist/!**!/!*',
+        'demo/dist/!**/!*'
+      ],
+      extensions: ['.js', '.ts','.vue'],
       babelHelpers: 'runtime'
     }),
     replace({
@@ -54,10 +61,6 @@ const config = {
     html({
       fileName: 'index.html',
       template: () => templateHtml,
-    }),
-    postcss({
-      modules: false,
-      extract: path.resolve('demo/dist/common.css'),
     }),
     serve({
       open: false,

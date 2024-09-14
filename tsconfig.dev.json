@@ -19,7 +19,8 @@
   },
   "exclude": [
     "node_modules",
-    "./demo/dist"
+    "./demo/dist",
+    "./dist"
   ],
   "include": [
     "./src/**/*",
