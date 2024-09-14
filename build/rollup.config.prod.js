@@ -3,7 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
 import { dts } from 'rollup-plugin-dts';
 import { babel } from '@rollup/plugin-babel';
-import terser from '@rollup/plugin-terser';
 import postcss from 'rollup-plugin-postcss';
 import eslint from '@rollup/plugin-eslint';
 import vue from 'rollup-plugin-vue';
@@ -38,8 +37,6 @@ export default [
         extensions: ['.js', '.ts'],
         babelHelpers: 'runtime'
       }),
-      // terser(),
-
       postcss({
         // extensions: ['.scss', '.css'],
         // 将样式提取到 dist/main.css 文件中

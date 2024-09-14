@@ -1,6 +1,7 @@
 <template>
   <div class="app-base-layout">
-    <VirtualWaterfall
+    <component
+      :is="VirtualWaterfall"
       :loading-box-height="100"
       :get-list="getList"
     >
@@ -16,18 +17,31 @@
       <template #loadingContent>
         <div class="loading-text">加载中~</div>
       </template>
-    </VirtualWaterfall>
+    </component>
   </div>
+
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { pxToVW } from '../src/utils/common';
-import VirtualWaterfall from '../src/components/VirtualWaterfall.vue';
-
-// 直接使用打包后的文件
-// import VirtualWaterfall from '../dist/index.js';
-
 import { testData } from './test/data';
+
+let VirtualWaterfall = ref(null);
+
+// 获取组件
+const getVirtualWaterfallComponent = async () => {
+  // 使用 yarn dev-dist 命令打包，导入打包后的组件文件和样式
+  if (process.env.IS_DIST) {
+    VirtualWaterfall.value = (await import('../dist/index.js')).default;
+    await import('../dist/main.css');
+  } else {
+    // 使用 yarn dev 命令打包，使用组件源文件
+    VirtualWaterfall.value = (await import('../src/components/VirtualWaterfall.vue')).default;
+  }
+}
+
+getVirtualWaterfallComponent();
 
 const pageSize = 20;
 
@@ -46,7 +60,6 @@ const getList = (start: number) => {
     );
   });
 };
-
 </script>
 
 <style lang="scss">
