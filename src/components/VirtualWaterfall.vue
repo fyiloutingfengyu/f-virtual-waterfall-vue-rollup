@@ -25,7 +25,6 @@
             ...waterfallItemStyle
           }"
         >
-          <!-- todo f -->
           <slot name="itemContent" :item="item">
             <div
               class="img-box"
