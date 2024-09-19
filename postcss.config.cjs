@@ -2,7 +2,7 @@ module.exports = {
   plugins: {
     'postcss-px-to-viewport-8-plugin': {
       unitToConvert: 'px', // 需要转换的单位
-      viewportWidth: file => {
+      viewportWidth: (file) => {
         let width = 750;
 
         if (file.indexOf('antd-mobile') !== -1) {

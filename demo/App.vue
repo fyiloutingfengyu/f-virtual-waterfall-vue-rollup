@@ -5,10 +5,10 @@
       :loading-box-height="100"
       :get-list="getList"
     >
-      <template #itemContent="{item}">
+      <template #itemContent="{ item }">
         <div
           class="img-box"
-          :style="{height: pxToVW(item.imgBoxHeight)}"
+          :style="{ height: pxToVW(item.imgBoxHeight) }"
         >
           <span class="idx">{{ item.index }}</span>
         </div>
@@ -19,7 +19,6 @@
       </template>
     </component>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -37,7 +36,9 @@ const getVirtualWaterfallComponent = async () => {
     await import('../dist/main.css');
   } else {
     // 使用 yarn dev 命令打包，使用组件源文件
-    VirtualWaterfall.value = (await import('../src/components/VirtualWaterfall.vue')).default;
+    VirtualWaterfall.value = (
+      await import('../src/components/VirtualWaterfall.vue')
+    ).default;
   }
 };
 

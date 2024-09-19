@@ -3,8 +3,8 @@
     ref="containerRef"
     class="virtual-waterfall-component"
     :style="{
-        height: setContainerHeight(),
-        padding: `0 ${pxToVW(containerPadding)}`
+      height: setContainerHeight(),
+      padding: `0 ${pxToVW(containerPadding)}`
     }"
   >
     <div
@@ -26,10 +26,13 @@
             ...waterfallItemStyle
           }"
         >
-          <slot name="itemContent" :item="value">
+          <slot
+            name="itemContent"
+            :item="value"
+          >
             <div
               class="img-box"
-              :style="{height: pxToVW(value.imgBoxHeight)}"
+              :style="{ height: pxToVW(value.imgBoxHeight) }"
             >
               <span class="idx">{{ value.index }}</span>
             </div>
@@ -156,9 +159,7 @@ const props = defineProps({
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const slots = defineSlots<{
-  itemContent(props: {
-    item: DomeDataItem
-  }): any
+  itemContent(props: { item: DomeDataItem }): any;
 }>();
 
 const designWidth = 750;
@@ -242,7 +243,9 @@ const setContainerHeight = () => {
 const computedColumnWidth = () => {
   const allGapWidth = props.gapX * (props.columnNumber - 1);
 
-  columnWidth.value = (designWidth - allGapWidth - props.containerPadding * 2) / props.columnNumber;
+  columnWidth.value =
+    (designWidth - allGapWidth - props.containerPadding * 2) /
+    props.columnNumber;
 };
 
 // 初始化每列高度列表
@@ -264,9 +267,7 @@ const computedDomData = (list: any[], startRenderIndex = 0) => {
   const tempDomDataList: DomeDataItem[] = [];
 
   for (let i = 0, len = list.length; i < len; i++) {
-    const imgHeight = Math.ceil(
-      (columnWidth.value * list[i].h) / list[i].w
-    );
+    const imgHeight = Math.ceil((columnWidth.value * list[i].h) / list[i].w);
 
     const item = {
       // 是下标也是唯一标识，可以用作ID
@@ -280,7 +281,10 @@ const computedDomData = (list: any[], startRenderIndex = 0) => {
       left: 0,
       top: 0,
       text: list[i].text,
-      textBoxHeight: props.textBoxParams.lineHeight + props.textBoxParams.marginTop + props.textBoxParams.marginBottom
+      textBoxHeight:
+        props.textBoxParams.lineHeight +
+        props.textBoxParams.marginTop +
+        props.textBoxParams.marginBottom
     };
 
     // 将当前数据放入高度最短的列
@@ -297,8 +301,10 @@ const computedDomData = (list: any[], startRenderIndex = 0) => {
     }
 
     const rows = Math.ceil(
-      (textWidth + props.textBoxParams.paddingLeft + props.textBoxParams.paddingRight) /
-      columnWidth.value
+      (textWidth +
+        props.textBoxParams.paddingLeft +
+        props.textBoxParams.paddingRight) /
+        columnWidth.value
     );
 
     if (rows >= props.textBoxParams.maxRows) {
@@ -327,7 +333,7 @@ const updateContentHeight = () => {
     // 瀑布流列表区域的高度为最高的列的高度
     contentRef.value.style.height = pxToVW(
       columnHeightList.value[columnHeightList.value.length - 1].height +
-      props.loadingBoxHeight
+        props.loadingBoxHeight
     );
   }
 };
@@ -340,11 +346,7 @@ const renderDomByDataList = (startRenderIndex = 0) => {
 
   // 渲染上线边界之间的元素
   // 从当前渲染出来的元素的起始位置开始遍历，直到总数据的结尾
-  for (
-    let i = startRenderIndex, len = domDataList.value.length;
-    i < len;
-    i++
-  ) {
+  for (let i = startRenderIndex, len = domDataList.value.length; i < len; i++) {
     const { index } = domDataList.value[i];
     const { isOverTopLine, isUnderBottomLine } = getBoundaryInfo(
       domDataList.value[i]
@@ -515,7 +517,6 @@ const updateDomPosition = (direction: number) => {
   startIndex.value = +keys[0];
   endIndex.value = +keys[keys.length - 1];
 };
-
 </script>
 
 <style scoped lang="scss">
@@ -531,7 +532,7 @@ const updateDomPosition = (direction: number) => {
       position: absolute;
       display: flex;
       flex-direction: column;
-      transition: all .12s;
+      transition: all 0.12s;
       overflow: hidden;
     }
 
