@@ -4,7 +4,6 @@ import esbuild from 'rollup-plugin-esbuild';
 import { dts } from 'rollup-plugin-dts';
 import { babel } from '@rollup/plugin-babel';
 import postcss from 'rollup-plugin-postcss';
-import eslint from '@rollup/plugin-eslint';
 import vue from 'rollup-plugin-vue';
 import path from 'path';
 import fRollupClear from '../plugins/f-rollup-plugin-clear.js';
@@ -30,7 +29,6 @@ export default [
         target: 'esnext',
         tsconfig: 'tsconfig.prod.json'
       }),
-      // eslint(),
       vue(),
       postcss({
         // extensions: ['.scss', '.css'],

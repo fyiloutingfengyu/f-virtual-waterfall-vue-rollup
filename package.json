@@ -7,9 +7,10 @@
     "dist"
   ],
   "scripts": {
-    "dev": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development -w",
-    "dev-dist": "rollup -c build/rollup.config.dev.js --environment NODE_ENV:development,IS_DIST -w",
-    "build": "rollup -c build/rollup.config.prod.js --environment NODE_ENV:production",
+    "lint:eslint": "eslint .",
+    "dev": "yarn lint:eslint && rollup -c build/rollup.config.dev.js --environment NODE_ENV:development -w",
+    "dev:dist": "yarn lint:eslint && rollup -c build/rollup.config.dev.js --environment NODE_ENV:development,IS_DIST -w",
+    "build": "yarn lint:eslint && rollup -c build/rollup.config.prod.js --environment NODE_ENV:production",
     "pub": "npm run build && npm publish"
   },
   "type": "module",
@@ -24,17 +25,18 @@
     "@babel/runtime-corejs3": "^7.25.6",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-eslint": "^9.0.5",
     "@rollup/plugin-html": "^1.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-replace": "^5.0.7",
     "@types/node": "^22.5.4",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
+    "@typescript-eslint/parser": "^8.6.0",
     "@vue/compiler-sfc": "^3.5.4",
     "autoprefixer": "^10.4.20",
     "esbuild": "^0.23.1",
+    "eslint": "^9.10.0",
+    "eslint-plugin-vue": "^9.28.0",
     "postcss": "^8.4.45",
     "postcss-px-to-viewport-8-plugin": "^1.2.5",
     "postcss-scss": "^4.0.9",
@@ -46,8 +48,15 @@
     "rollup-plugin-serve": "^1.1.1",
     "rollup-plugin-vue": "^6.0.0",
     "sass": "^1.78.0",
-    "typescript": "^5.6.2",
+    "tslib": "^2.7.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.6.0",
     "vue": "^3.5.4"
+  },
+  "resolutions": {
+    "strip-ansi": "6.0.1",
+    "string-width": "4.2.2",
+    "wrap-ansi": "7.0.0"
   },
   "browserslist": [
     "> 1%",
@@ -56,8 +65,5 @@
     "iOS >= 8",
     "Firefox >= 20",
     "Android > 4.4"
-  ],
-  "dependencies": {
-    "tslib": "^2.7.0"
-  }
+  ]
 }

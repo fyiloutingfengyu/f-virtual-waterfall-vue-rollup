@@ -31,7 +31,7 @@ let VirtualWaterfall = shallowRef(null);
 
 // 获取组件
 const getVirtualWaterfallComponent = async () => {
-  // 使用 yarn dev-dist 命令打包，导入打包后的组件文件和样式
+  // 使用 yarn dev:dist 命令打包，导入打包后的组件文件和样式
   if (process.env.IS_DIST) {
     VirtualWaterfall.value = (await import('../dist/index.js')).default;
     await import('../dist/main.css');

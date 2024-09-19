@@ -8,7 +8,6 @@ import livereload from 'rollup-plugin-livereload';
 import html from '@rollup/plugin-html';
 import replace from '@rollup/plugin-replace';
 import vue from 'rollup-plugin-vue';
-// import eslint from '@rollup/plugin-eslint';
 import { readFileSync } from 'fs';
 import path from 'path';
 
@@ -34,7 +33,6 @@ const config = {
       target: 'esnext',
       tsconfig: 'tsconfig.dev.json'
     }),
-    // eslint(),
     vue({
       exclude: 'dist/**/*',
     }),

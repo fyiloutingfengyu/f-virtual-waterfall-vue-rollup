@@ -11,28 +11,29 @@
       ref="contentRef"
       class="content-box"
     >
+      <!--  todo f   -->
       <template
-        v-for="(item) in renderList"
-        :key="item.index"
+        v-for="value in renderMap"
+        :key="value.index"
       >
         <div
           class="waterfall-item"
-          :id="`item_${item.index}`"
+          :id="`item_${value.index}`"
           :style="{
-            width: pxToVW(item.width),
-            height: pxToVW(item.height),
-            transform: `translate(${pxToVW(item.left)}, ${pxToVW(item.top)})`,
+            width: pxToVW(value.width),
+            height: pxToVW(value.height),
+            transform: `translate(${pxToVW(value.left)}, ${pxToVW(value.top)})`,
             ...waterfallItemStyle
           }"
         >
-          <slot name="itemContent" :item="item">
+          <slot name="itemContent" :item="value">
             <div
               class="img-box"
-              :style="{height: pxToVW(item.imgBoxHeight)}"
+              :style="{height: pxToVW(value.imgBoxHeight)}"
             >
-              <span class="idx">{{ item.index }}</span>
+              <span class="idx">{{ value.index }}</span>
             </div>
-            <div class="text-box ellipsis-line-2">{{ item.text }}</div>
+            <div class="text-box ellipsis-line-2">{{ value.text }}</div>
           </slot>
         </div>
       </template>
@@ -47,7 +48,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { getDataType, pxToVW, throttle } from '../utils/common';
+import { pxToVW, throttle } from '../utils/common';
 
 interface ColumnHeightItem {
   index: number;
@@ -153,6 +154,7 @@ const props = defineProps({
   }
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const slots = defineSlots<{
   itemContent(props: {
     item: DomeDataItem
@@ -173,8 +175,6 @@ const domDataList = ref<DomeDataItem[]>([]);
 const columnHeightList = ref<ColumnHeightItem[]>([]);
 // 存放当前被渲染出来的元素
 const renderMap = ref<RenderMap>({});
-// 更新页面视图的渲染列表，由 renderMap 的values组成的数组
-const renderList = ref<DomeDataItem[]>([]);
 // 当前被渲染出来的元素的开头位置的下标
 const startIndex = ref(0);
 // 当前被渲染出来的元素的结尾位置的下标
@@ -372,10 +372,6 @@ const renderDomByDataList = (startRenderIndex = 0) => {
 
   startIndex.value = +keys[0];
   endIndex.value = +keys[keys.length - 1];
-
-  if (renderMap.value) {
-    renderList.value = Object.values(renderMap.value);
-  }
 };
 
 // 将750设计稿对应的尺寸转为当前容器视口下的大小
@@ -518,10 +514,6 @@ const updateDomPosition = (direction: number) => {
 
   startIndex.value = +keys[0];
   endIndex.value = +keys[keys.length - 1];
-
-  if (renderMap.value) {
-    renderList.value = Object.values(renderMap.value);
-  }
 };
 
 </script>
