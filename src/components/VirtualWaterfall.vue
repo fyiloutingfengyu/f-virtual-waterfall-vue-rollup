@@ -195,10 +195,10 @@ const endIndex = ref(0);
 const containerOffset = window.innerHeight / 2;
 // 是否正在加载下一页的数据
 const isLoadingNextPage = ref(false);
-// 页面滚动方向，向下为1 (页面底部追加数据 ↓，滚动条向下移动)，向上为 -1（页面顶部追加数据 ↑，滚动条向上移动）
+// 页面滑动方向，上滑为 1（页面底部追加数据），下滑为 -1（页面顶部追加数据）
 const scrollDirection = ref(1);
 // 垂直方向上上次滚动的距离
-const lastScrollNumY = ref(0);
+const lastScrollTop = ref(0);
 // 转换为当前视口下的 textBoxParams 尺寸
 const realTextBoxParams = reactive<TextBoxParams>({
   paddingLeft: 10,
@@ -406,7 +406,7 @@ const renderDomByDataList = (startRenderIndex = 0) => {
   const tempRenderMap: RenderMap = {};
 
   // 渲染上下边界之间的元素
-  // 从当前渲染出来的元素的起始位置开始遍历，直到总数据的结尾
+  // 从当前渲染出来的元素的后一个元素的位置开始遍历，直到总数据的结尾
   for (let i = startRenderIndex, len = domDataList.value.length; i < len; i++) {
     const { index } = domDataList.value[i];
     const { isOverTopLine, isUnderBottomLine } = getBoundaryInfo(
@@ -433,6 +433,7 @@ const renderDomByDataList = (startRenderIndex = 0) => {
 
   const keys = Object.keys(renderMap.value);
 
+  // 通过加号转为数字
   startIndex.value = +keys[0];
   endIndex.value = +keys[keys.length - 1];
 };
@@ -482,15 +483,15 @@ const handleScroll = throttle(async () => {
     scrollHeight = containerRef.value.scrollHeight;
   }
 
-  scrollDirection.value = scrollTop - lastScrollNumY.value > 0 ? 1 : -1;
-  lastScrollNumY.value = scrollTop;
+  scrollDirection.value = scrollTop - lastScrollTop.value > 0 ? 1 : -1;
+  lastScrollTop.value = scrollTop;
 
   updateDomPosition(scrollDirection.value);
 
   if (isLoadingNextPage.value || !hasNextPage.value) return;
 
-  // 当已经展示出来的内容高度大于当前数据内容总高度的85%的时候开始加载新数据
-  if (scrollTop + offsetHeight >= scrollHeight * 0.85) {
+  // 当已经展示出来的内容高度大于当前数据内容总高度的80%的时候开始加载新数据
+  if (scrollTop + offsetHeight >= scrollHeight * 0.8) {
     isLoadingNextPage.value = true;
 
     // page 加1，获取下一页数据
@@ -527,7 +528,7 @@ const handleScroll = throttle(async () => {
 const updateDomPosition = (direction: number) => {
   const tempRenderMap: RenderMap = {};
 
-  // 检查现有列表中的元素，不在渲染区域内的元素删除,渲染区域内的保留
+  // 检查当前已经渲染的列表中的元素，不在渲染区域内的元素删除,渲染区域内的保留
   for (let i = startIndex.value; i <= endIndex.value; i++) {
     const { isOverTopLine, isUnderBottomLine } = getBoundaryInfo(
       domDataList.value[i]
@@ -540,7 +541,7 @@ const updateDomPosition = (direction: number) => {
     tempRenderMap[i] = domDataList.value[i];
   }
 
-  // 向上 ↑（滚动条向上移动）
+  // 下滑（页面顶部追加数据）
   if (direction < 0) {
     // 从现有渲染列表第一个元素的上一个元素依次取新元素，对符合条件的元素进行渲染
     for (let j = startIndex.value - 1; j >= 0; j--) {
@@ -552,7 +553,7 @@ const updateDomPosition = (direction: number) => {
       tempRenderMap[j] = domDataList.value[j];
     }
   } else {
-    // 向下（滚动条向下移动）
+    // 上滑（页面底部追加数据）
     // 从现有列表最后一个元素的下一个元素依次取新元素，对符合条件的元素进行渲染
     for (let k = endIndex.value + 1; k < domDataList.value.length; k++) {
       const { isUnderBottomLine } = getBoundaryInfo(domDataList.value[k]);
