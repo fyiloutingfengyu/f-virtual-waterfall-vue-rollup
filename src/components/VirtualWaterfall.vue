@@ -11,7 +11,6 @@
       ref="contentRef"
       class="content-box"
     >
-      <!--  todo f   -->
       <template
         v-for="value in renderMap"
         :key="value.index"
@@ -20,9 +19,9 @@
           class="waterfall-item"
           :id="`item_${value.index}`"
           :style="{
-            width: pxToVW(value.width),
-            height: pxToVW(value.height),
-            transform: `translate(${pxToVW(value.left)}, ${pxToVW(value.top)})`,
+            width: `${value.width}px`,
+            height: `${value.height}px`,
+            transform: `translate(${value.left}px, ${value.top}px)`,
             ...waterfallItemStyle
           }"
         >
@@ -32,7 +31,7 @@
           >
             <div
               class="img-box"
-              :style="{ height: pxToVW(value.imgBoxHeight) }"
+              :style="{ height: `${value.imgBoxHeight}px` }"
             >
               <span class="idx">{{ value.index }}</span>
             </div>
@@ -50,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, reactive, watch } from 'vue';
 import { pxToVW, throttle } from '../utils/common';
 
 interface ColumnHeightItem {
@@ -73,6 +72,17 @@ interface DomeDataItem {
 interface RenderMap {
   [key: string | number]: DomeDataItem;
 }
+
+interface TextBoxParams {
+  paddingLeft: number;
+  paddingRight: number;
+  marginTop: number;
+  marginBottom: number;
+  lineHeight: number;
+  maxRows?: number;
+}
+
+type TextBoxParamsKey = keyof TextBoxParams;
 
 defineOptions({
   name: 'VirtualWaterfall'
@@ -102,7 +112,7 @@ const props = defineProps({
   },
   // 外层包裹容器的高度
   containerHeight: {
-    type: [String, Number],
+    type: [Number, String],
     default: '100vh'
   },
   // 外层包裹容器的top属性或margin-top的值
@@ -160,6 +170,7 @@ const props = defineProps({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const slots = defineSlots<{
   itemContent(props: { item: DomeDataItem }): any;
+  loadingContent(props: any): any;
 }>();
 
 const designWidth = 750;
@@ -188,12 +199,51 @@ const isLoadingNextPage = ref(false);
 const scrollDirection = ref(1);
 // 垂直方向上上次滚动的距离
 const lastScrollNumY = ref(0);
+// 转换为当前视口下的 textBoxParams 尺寸
+const realTextBoxParams = reactive<TextBoxParams>({
+  paddingLeft: 10,
+  paddingRight: 10,
+  marginTop: 10,
+  marginBottom: 10,
+  lineHeight: 24
+});
 const canvas = document.createElement('canvas');
-const getTextBoxHeightCtx = canvas.getContext('2d');
+const getTextBoxHeightCtx: any = canvas.getContext('2d');
 
 if (getTextBoxHeightCtx) {
   getTextBoxHeightCtx.font = props.textFont;
 }
+
+// 将750设计稿对应的尺寸转为当前容器视口下的大小
+// 用于页面计算的尺寸全部都需要通过此方法转换
+const getSizeByViewport = (size: number) => {
+  let containerWidth = 375;
+
+  if (containerRef.value) {
+    containerWidth = containerRef.value.offsetWidth;
+  }
+
+  return containerWidth / (designWidth / size);
+};
+
+watch(
+  () => props.textBoxParams,
+  (newVal) => {
+    for (const key in realTextBoxParams) {
+      if (Object.hasOwn(realTextBoxParams, key)) {
+        if (newVal) {
+          realTextBoxParams[key as TextBoxParamsKey] = getSizeByViewport(
+            newVal[key]
+          );
+        }
+      }
+    }
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+);
 
 onMounted(() => {
   if (containerRef.value) {
@@ -209,10 +259,12 @@ onUnmounted(() => {
 
 // 初始化数据
 const init = async () => {
+  if (!props.getList) {
+    return;
+  }
+
   // 获取列表数据
   const list: any = await props.getList((page.value - 1) * props.pageSize);
-
-  console.log('列表数据', list);
 
   if (Array.isArray(list)) {
     hasNextPage.value = list.length === props.pageSize;
@@ -232,10 +284,10 @@ init();
 
 // 设置外层容器的高度
 const setContainerHeight = () => {
-  if (typeof props.containerHeight === 'string') {
-    return props.containerHeight;
-  } else {
+  if (typeof props.containerHeight === 'number') {
     return pxToVW(props.containerHeight);
+  } else {
+    return props.containerHeight;
   }
 };
 
@@ -243,8 +295,12 @@ const setContainerHeight = () => {
 const computedColumnWidth = () => {
   const allGapWidth = props.gapX * (props.columnNumber - 1);
 
+  // 使用当前视口的宽高尺寸
+  const containerWidth = containerRef.value?.offsetWidth || 375;
+
   columnWidth.value =
-    (designWidth - allGapWidth - props.containerPadding * 2) /
+    (containerWidth -
+      getSizeByViewport(allGapWidth + props.containerPadding * 2)) /
     props.columnNumber;
 };
 
@@ -267,7 +323,7 @@ const computedDomData = (list: any[], startRenderIndex = 0) => {
   const tempDomDataList: DomeDataItem[] = [];
 
   for (let i = 0, len = list.length; i < len; i++) {
-    const imgHeight = Math.ceil((columnWidth.value * list[i].h) / list[i].w);
+    const imgHeight = Math.ceil((columnWidth.value / list[i].w) * list[i].h);
 
     const item = {
       // 是下标也是唯一标识，可以用作ID
@@ -282,46 +338,51 @@ const computedDomData = (list: any[], startRenderIndex = 0) => {
       top: 0,
       text: list[i].text,
       textBoxHeight:
-        props.textBoxParams.lineHeight +
-        props.textBoxParams.marginTop +
-        props.textBoxParams.marginBottom
+        realTextBoxParams.lineHeight +
+        realTextBoxParams.marginTop +
+        realTextBoxParams.marginBottom
     };
 
     // 将当前数据放入高度最短的列
     columnHeightList.value.sort((a, b) => a.height - b.height);
 
     item.columnIndex = columnHeightList.value[0].index;
-    item.left = (item.columnIndex - 1) * (props.gapX + columnWidth.value);
+    item.left =
+      (item.columnIndex - 1) *
+      (getSizeByViewport(props.gapX as number) + columnWidth.value);
+
     item.top = columnHeightList.value[0].height;
 
     let textWidth = 0;
 
     if (getTextBoxHeightCtx) {
-      textWidth = getTextBoxHeightCtx.measureText(item.text).width;
+      textWidth = getSizeByViewport(
+        getTextBoxHeightCtx.measureText(item.text).width
+      );
     }
 
     const rows = Math.ceil(
       (textWidth +
-        props.textBoxParams.paddingLeft +
-        props.textBoxParams.paddingRight) /
+        realTextBoxParams.paddingLeft +
+        realTextBoxParams.paddingRight) /
         columnWidth.value
     );
 
     if (rows >= props.textBoxParams.maxRows) {
-      item.textBoxHeight =
-        item.textBoxHeight +
-        props.textBoxParams.lineHeight * (props.textBoxParams.maxRows - 1);
+      item.textBoxHeight +=
+        realTextBoxParams.lineHeight * (props.textBoxParams.maxRows - 1);
     }
 
     item.height += item.textBoxHeight;
 
-    columnHeightList.value[0].height += item.height + props.gapY;
+    columnHeightList.value[0].height +=
+      item.height + getSizeByViewport(props.gapY as number);
 
     tempDomDataList.push(item);
   }
 
   domDataList.value = domDataList.value.concat(tempDomDataList);
-  // 每次追加完数据后，更新瀑布流容器的高度
+  // 每次追加完数据后，更新瀑布流内容容器的高度
   updateContentHeight();
 };
 
@@ -331,10 +392,10 @@ const updateContentHeight = () => {
 
   if (contentRef.value) {
     // 瀑布流列表区域的高度为最高的列的高度
-    contentRef.value.style.height = pxToVW(
+    contentRef.value.style.height =
       columnHeightList.value[columnHeightList.value.length - 1].height +
-        props.loadingBoxHeight
-    );
+      getSizeByViewport(props.loadingBoxHeight as number) +
+      'px';
   }
 };
 
@@ -344,7 +405,7 @@ const renderDomByDataList = (startRenderIndex = 0) => {
 
   const tempRenderMap: RenderMap = {};
 
-  // 渲染上线边界之间的元素
+  // 渲染上下边界之间的元素
   // 从当前渲染出来的元素的起始位置开始遍历，直到总数据的结尾
   for (let i = startRenderIndex, len = domDataList.value.length; i < len; i++) {
     const { index } = domDataList.value[i];
@@ -376,44 +437,32 @@ const renderDomByDataList = (startRenderIndex = 0) => {
   endIndex.value = +keys[keys.length - 1];
 };
 
-// 将750设计稿对应的尺寸转为当前容器视口下的大小
-const getSizeByViewport = (size: number) => {
-  let containerWidth = 375;
-
-  if (containerRef.value) {
-    containerWidth = containerRef.value.offsetWidth;
-  }
-
-  return containerWidth / (designWidth / size);
-};
-
 // 获取当前元素的边界信息
 const getBoundaryInfo = (item: DomeDataItem) => {
   const { top, height } = item;
-  const newContainerOffset = getSizeByViewport(containerOffset);
 
   // 当前元素的底部的位置
-  const y = getSizeByViewport(top + height + props.containerTop);
+  const y = top + height + getSizeByViewport(props.containerTop as number);
 
-  let topLine = -newContainerOffset;
-  let bottomLine = newContainerOffset;
+  let topLine = -containerOffset;
+  let bottomLine = containerOffset;
 
   if (containerRef.value) {
     // 向上扩展半屏
-    topLine = containerRef.value.scrollTop - newContainerOffset;
+    topLine = containerRef.value.scrollTop - containerOffset;
 
     // 向下扩展半屏
     bottomLine =
       containerRef.value.scrollTop +
       containerRef.value.offsetHeight +
-      newContainerOffset;
+      containerOffset;
   }
 
   // 是否在上线之上
   const isOverTopLine = topLine > y;
 
   // 是否在下线之下
-  const isUnderBottomLine = getSizeByViewport(top) > bottomLine;
+  const isUnderBottomLine = top > bottomLine;
 
   return {
     isOverTopLine,
@@ -425,10 +474,12 @@ const getBoundaryInfo = (item: DomeDataItem) => {
 const handleScroll = throttle(async () => {
   let scrollTop = 0;
   let offsetHeight = 0;
+  let scrollHeight = 0;
 
   if (containerRef.value) {
     scrollTop = containerRef.value.scrollTop;
     offsetHeight = containerRef.value.offsetHeight;
+    scrollHeight = containerRef.value.scrollHeight;
   }
 
   scrollDirection.value = scrollTop - lastScrollNumY.value > 0 ? 1 : -1;
@@ -439,13 +490,17 @@ const handleScroll = throttle(async () => {
   if (isLoadingNextPage.value || !hasNextPage.value) return;
 
   // 当已经展示出来的内容高度大于当前数据内容总高度的85%的时候开始加载新数据
-  if (scrollTop + offsetHeight >= offsetHeight * 0.85) {
+  if (scrollTop + offsetHeight >= scrollHeight * 0.85) {
     isLoadingNextPage.value = true;
 
     // page 加1，获取下一页数据
     page.value += 1;
 
     let list: any = [];
+
+    if (!props.getList) {
+      return;
+    }
 
     try {
       list = await props.getList((page.value - 1) * props.pageSize);
